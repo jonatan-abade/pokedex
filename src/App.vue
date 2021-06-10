@@ -1,19 +1,65 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h3 class="is-size-3">Pokedex</h3>
+
+    <input
+      v-model="busca"
+      class="input is-rounded"
+      type="text"
+      placeholder="Buscar Pokemon pelo nome"
+      @keyup="buscar"
+    />
+
+    <hr />
+    <div class="columns is-multiline">
+      <div
+        v-for="(pokemon, index) in pokemonsFiltrados"
+        :key="pokemon.url"
+        class="column is-one-quarter"
+      >
+        <Pokemon :name="pokemon.name" :url="pokemon.url" :num="index + 1" />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import axios from "axios";
+import Pokemon from "./components/Pokemon.vue";
 
 export default {
-  name: 'App',
+  name: "App",
+  data() {
+    return {
+      pokemons: [],
+      pokemonsFiltrados: [],
+      busca: "",
+    };
+  },
+  created: function () {
+    axios
+      .get("https://pokeapi.co/api/v2/pokemon?limit=151&offset=0")
+      .then((res) => {
+        this.pokemons = res.data.results;
+        this.pokemonsFiltrados = res.data.results;
+      });
+  },
   components: {
-    HelloWorld
-  }
-}
+    Pokemon,
+  },
+  methods: {
+    buscar: function () {
+      this.pokemonsFiltrados = this.pokemons;
+      if (this.busca == "" || this.busca == " ") {
+        this.pokemonsFiltrados = this.pokemons;
+      } else {
+        this.pokemonsFiltrados = this.pokemons.filter((pokemon) =>
+          pokemon.name.match(this.busca.toLocaleLowerCase())
+        );
+      }
+    },
+  },
+};
 </script>
 
 <style>
